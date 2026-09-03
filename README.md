@@ -39,6 +39,14 @@ This command initializes the stock_picker Crew, assembling the agents and assign
 
 Every agent and the hierarchical manager use the same quality-first, per-call model fallback: Gemini 3.7 Flash, Gemini 3.6 Flash, Groq GPT-OSS 120B, and OpenRouter NVIDIA Nemotron 3 Super Free. Missing provider keys are skipped. Pushover notifications are also skipped cleanly when their optional credentials are absent.
 
+To run the bilingual Gradio interface:
+
+```bash
+uv run python app.py
+```
+
+Open `http://127.0.0.1:7860`. The interface accepts a market sector and returns the crew's final stock selection report.
+
 This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
 
 ## Understanding Your Crew

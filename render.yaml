@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: stock-picker
+    runtime: python
+    plan: free
+    buildCommand: pip install .
+    startCommand: python app.py
+    healthCheckPath: /
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: SERPER_API_KEY
+        sync: false
+      - key: PUSHOVER_USER
+        sync: false
+      - key: PUSHOVER_TOKEN
+        sync: false

@@ -20,7 +20,8 @@ def run():
     """
     inputs = {
         'sector': 'Technology',
-        "current_date": str(datetime.now().date())
+        "current_date": str(datetime.now().date()),
+        "language_instruction": "Write the complete research and final recommendation in English."
     }
 
 
@@ -36,7 +37,8 @@ def train():
     """
     inputs = {
         "sector": "Technology",
-        "current_date": str(datetime.now().date())
+        "current_date": str(datetime.now().date()),
+        "language_instruction": "Write the complete research and final recommendation in English."
     }
     try:
         StockPicker(llm=fallback_llm()).crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
@@ -60,7 +62,8 @@ def test():
     """
     inputs = {
         "sector": "Technology",
-        "current_date": str(datetime.now().date())
+        "current_date": str(datetime.now().date()),
+        "language_instruction": "Write the complete research and final recommendation in English."
     }
 
     try:
@@ -86,7 +89,8 @@ def run_with_trigger():
     inputs = {
         "crewai_trigger_payload": trigger_payload,
         "sector": trigger_payload.get("sector", "Technology"),
-        "current_date": str(datetime.now().date())
+        "current_date": str(datetime.now().date()),
+        "language_instruction": trigger_payload.get("language_instruction", "Write the complete research and final recommendation in English.")
     }
 
     try:

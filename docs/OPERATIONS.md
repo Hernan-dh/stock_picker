@@ -7,6 +7,8 @@
 3. Copy `.env.example` to `.env`, set `SERPER_API_KEY`, and configure at least one runtime model key: `GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY`. Add Pushover credentials only if notifications are required.
 4. Run `uv run crewai run`.
 
+For the web interface, run `uv run python app.py` and open `http://127.0.0.1:7860`. Override the port with `PORT`; production services must expose that same environment-provided port.
+
 Generated files in `output/` and `sandbox*/` are local artifacts and are excluded from publication.
 
 At runtime, missing model-provider keys are skipped and the configured providers are tried in quality order. If all configured providers fail, the error lists each attempted provider without exposing credentials. Missing Pushover credentials disable only the notification; report generation continues.
