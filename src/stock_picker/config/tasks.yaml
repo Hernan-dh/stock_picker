@@ -25,7 +25,6 @@ research_trending_companies:
 pick_best_company:
   description: >
     Analyze the research findings and pick exactly one company as the strongest candidate. Ensure research is up to date as of {current_date}.
-    Send a push notification to the user with the decision and 1 sentence rationale.
     Then respond with a detailed report on why you chose this company, and which companies were not selected.
     {language_instruction}
   expected_output: >

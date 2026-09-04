@@ -20,7 +20,7 @@ crewai install
 ```
 ### Customizing
 
-Configure `SERPER_API_KEY`, plus at least one of `GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY` in `.env`. Pushover credentials are required only if you want the final notification.
+Configure `SERPER_API_KEY`, plus at least one of `GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY` in `.env`.
 
 - Modify `src/stock_picker/config/agents.yaml` to define your agents
 - Modify `src/stock_picker/config/tasks.yaml` to define your tasks
@@ -37,7 +37,7 @@ $ crewai run
 
 This command initializes the stock_picker Crew, assembling the agents and assigning them tasks as defined in your configuration.
 
-Every agent uses the same quality-first, per-call model fallback: Gemini 3.7 Flash, Gemini 3.6 Flash, Groq GPT-OSS 120B, and OpenRouter NVIDIA Nemotron 3 Super Free. Failed or repetitive responses move to the next provider. Missing provider keys are skipped. Pushover notifications are also skipped cleanly when their optional credentials are absent.
+Every agent uses the same quality-first, per-call model fallback: Gemini 3.7 Flash, Gemini 3.6 Flash, Groq GPT-OSS 120B, and OpenRouter NVIDIA Nemotron 3 Super Free. Failed or repetitive responses move to the next provider. Missing provider keys are skipped.
 
 To run the bilingual Gradio interface:
 

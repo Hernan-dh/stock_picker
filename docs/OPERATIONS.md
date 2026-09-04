@@ -4,14 +4,14 @@
 
 1. Install Python 3.10–3.13 and `uv`.
 2. Run `uv sync`.
-3. Copy `.env.example` to `.env`, set `SERPER_API_KEY`, and configure at least one runtime model key: `GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY`. Add Pushover credentials only if notifications are required.
+3. Copy `.env.example` to `.env`, set `SERPER_API_KEY`, and configure at least one runtime model key: `GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY`.
 4. Run `uv run crewai run`.
 
 For the web interface, run `uv run python app.py` and open `http://127.0.0.1:7860`. Override the port with `PORT`; production services must expose that same environment-provided port.
 
 Generated files in `output/` and `sandbox*/` are local artifacts and are excluded from publication.
 
-At runtime, missing model-provider keys are skipped and the configured providers are tried in quality order. If all configured providers fail, the error lists each attempted provider without exposing credentials. Missing Pushover credentials disable only the notification; report generation continues.
+At runtime, missing model-provider keys are skipped and the configured providers are tried in quality order. If all configured providers fail, the error lists each attempted provider without exposing credentials.
 
 Each research agent receives at most four Serper results per query. The finder is instructed to use no more than two focused searches and the researcher no more than three, with tighter CrewAI iteration budgets as a backstop. Explicit provider rate limits receive one retry only when the requested wait is ten seconds or less; daily quotas and longer waits move immediately to the next configured model.
 

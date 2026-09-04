@@ -15,7 +15,3 @@ services:
         sync: false
       - key: SERPER_API_KEY
         sync: false
-      - key: PUSHOVER_USER
-        sync: false
-      - key: PUSHOVER_TOKEN
-        sync: false
