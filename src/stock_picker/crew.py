@@ -5,9 +5,9 @@ from pydantic import BaseModel, Field
 from crewai_tools import SerperDevTool
 
 
-def compact_search_tool() -> SerperDevTool:
+def compact_search_tool(max_usage_count: int) -> SerperDevTool:
     """Keep search context and free-tier usage bounded for each research agent."""
-    return SerperDevTool(n_results=4, max_usage_count=4)
+    return SerperDevTool(n_results=4, max_usage_count=max_usage_count)
 
 
 class TrendingCompany(BaseModel):
@@ -48,20 +48,20 @@ class StockPicker():
     @agent
     def trending_company_finder(self) -> Agent:
         return Agent(config=self.agents_config['trending_company_finder'],
-                     llm=self.llm, tools=[compact_search_tool()], verbose=True,
-                     max_iter=5, max_retry_limit=1)
+                     llm=self.llm, tools=[compact_search_tool(2)], verbose=True,
+                     max_iter=4, max_retry_limit=1)
 
     @agent
     def financial_researcher(self) -> Agent:
         return Agent(config=self.agents_config['financial_researcher'],
-                     llm=self.llm, tools=[compact_search_tool()], verbose=True,
-                     max_iter=6, max_retry_limit=1)
+                     llm=self.llm, tools=[compact_search_tool(3)], verbose=True,
+                     max_iter=5, max_retry_limit=1)
 
     @agent
     def stock_picker(self) -> Agent:
         return Agent(config=self.agents_config['stock_picker'],
                      llm=self.llm, verbose=True,
-                     max_iter=4, max_retry_limit=1)
+                     max_iter=3, max_retry_limit=1)
 
     @task
     def find_trending_companies(self) -> Task:
