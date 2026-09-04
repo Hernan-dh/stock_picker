@@ -28,7 +28,7 @@ The runtime is pinned to CrewAI 1.15.18 for reproducible execution.
 
 ## Model resilience
 
-All agents share one CrewAI-compatible fallback LLM. Each model call tries the configured free-tier options in order: Gemini 3.7 Flash, Gemini 3.6 Flash, Groq-hosted GPT-OSS 120B, then OpenRouter-hosted NVIDIA Nemotron 3 Super Free. A provider failure or degenerate repetitive response retries only that call with the next model and preserves completed task output. Short transient limits may be retried once; daily quotas and waits longer than ten seconds fail over immediately. Model calls are capped at 4,096 output tokens.
+All agents share one CrewAI-compatible fallback LLM. Each model call tries the configured free-tier options in order: Gemini 3.8/3.7/3.6 Flash, Groq-hosted GPT-OSS 120B, then OpenRouter-hosted NVIDIA Nemotron 3 Ultra/Super Free. A provider failure or degenerate repetitive response retries only that call with the next model and preserves completed task output. Short transient limits may be retried once; daily quotas and waits longer than ten seconds fail over immediately. Model calls are capped at 4,096 output tokens.
 
 CrewAI memory is intentionally disabled because its default embedding path can require an unrelated OpenAI credential. Serper remains the external source for current financial news and market research.
 
