@@ -28,13 +28,14 @@ The runtime is pinned to CrewAI 1.15.18 for reproducible execution.
 
 ## Model resilience
 
-All agents, including the hierarchical manager, share one CrewAI-compatible fallback LLM. Each model call tries the configured free-tier options in order: Gemini 3.7 Flash, Gemini 3.6 Flash, Groq-hosted GPT-OSS 120B, then OpenRouter-hosted NVIDIA Nemotron 3 Super Free. A provider failure retries only that call and preserves completed task output. Model calls allow up to 16,384 output tokens.
+All agents share one CrewAI-compatible fallback LLM. Each model call tries the configured free-tier options in order: Gemini 3.7 Flash, Gemini 3.6 Flash, Groq-hosted GPT-OSS 120B, then OpenRouter-hosted NVIDIA Nemotron 3 Super Free. A provider failure or degenerate repetitive response retries only that call with the next model and preserves completed task output. Short transient limits may be retried once; daily quotas and waits longer than ten seconds fail over immediately. Model calls are capped at 4,096 output tokens.
 
 CrewAI memory is intentionally disabled because its default embedding path can require an unrelated OpenAI credential. Serper remains the external source for current financial news and market research.
 
 ## Web interface
 
-The Gradio interface defaults to English unless the browser language starts with `es`. English and Spanish use separate chat presentations, while both execute the same hierarchical crew. Each request supplies the sector, current date, and output-language instruction. Requests are queued one at a time because generated report paths are shared.
+The Gradio interface defaults to English unless the browser language starts with `es`. English and Spanish use separate chat presentations, while both execute the same sequential finder-to-researcher-to-picker crew. Each request supplies the sector, current date, and output-language instruction. Requests are queued one at a time because generated report paths are shared.
+
 
 ## Related decisions
 

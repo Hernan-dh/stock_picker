@@ -13,6 +13,8 @@ Generated files in `output/` and `sandbox*/` are local artifacts and are exclude
 
 At runtime, missing model-provider keys are skipped and the configured providers are tried in quality order. If all configured providers fail, the error lists each attempted provider without exposing credentials. Missing Pushover credentials disable only the notification; report generation continues.
 
+Each research agent receives at most four Serper results per query. The finder is instructed to use no more than two focused searches and the researcher no more than three, with tighter CrewAI iteration budgets as a backstop. Explicit provider rate limits receive one retry only when the requested wait is ten seconds or less; daily quotas and longer waits move immediately to the next configured model.
+
 ## Verification
 
 Run `./scripts/verify.sh`, or on Windows run `uv run python scripts/verify.py`.

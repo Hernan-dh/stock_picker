@@ -37,7 +37,7 @@ $ crewai run
 
 This command initializes the stock_picker Crew, assembling the agents and assigning them tasks as defined in your configuration.
 
-Every agent and the hierarchical manager use the same quality-first, per-call model fallback: Gemini 3.7 Flash, Gemini 3.6 Flash, Groq GPT-OSS 120B, and OpenRouter NVIDIA Nemotron 3 Super Free. Missing provider keys are skipped. Pushover notifications are also skipped cleanly when their optional credentials are absent.
+Every agent uses the same quality-first, per-call model fallback: Gemini 3.7 Flash, Gemini 3.6 Flash, Groq GPT-OSS 120B, and OpenRouter NVIDIA Nemotron 3 Super Free. Failed or repetitive responses move to the next provider. Missing provider keys are skipped. Pushover notifications are also skipped cleanly when their optional credentials are absent.
 
 To run the bilingual Gradio interface:
 

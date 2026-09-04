@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import os
+import re
+import time
+from collections import Counter
 from typing import Any
 
 from crewai.llms.base_llm import BaseLLM
@@ -14,6 +17,37 @@ from pydantic import Field
 from stock_picker.model_config import MODEL_FALLBACKS, MODEL_MAX_OUTPUT_TOKENS, MODEL_TIMEOUT_SECONDS, ModelSpec
 
 load_dotenv()
+
+
+def is_repetitive_response(result: Any) -> bool:
+    """Detect long, degenerate model outputs before accepting a provider call."""
+    if not isinstance(result, str):
+        return False
+    words = re.findall(r"[a-z0-9]+", result.lower())
+    if len(words) < 120:
+        return False
+    trigrams = Counter(zip(words, words[1:], words[2:]))
+    return bool(trigrams and trigrams.most_common(1)[0][1] >= 12)
+
+
+def rate_limit_retry_delay(error: Exception) -> float | None:
+    """Return a short retry delay only when a free-tier limit can recover quickly."""
+    if type(error).__name__ not in {"RateLimitError", "APIStatusError"}:
+        return None
+    if getattr(error, "status_code", 429) != 429:
+        return None
+    message = str(error)
+    if re.search(r"per[\s_-]*day|requests? per day|daily quota", message, re.IGNORECASE):
+        return None
+    matches = re.findall(
+        r"(?:try again in|retryDelay['\"]?:)\s*['\"]?([0-9.]+)s",
+        message,
+        re.IGNORECASE,
+    )
+    requested = float(matches[-1]) if matches else 5.0
+    if requested > 10.0:
+        return None
+    return max(requested + 0.5, 1.0)
 
 
 class FallbackLLM(BaseLLM):
@@ -39,21 +73,35 @@ class FallbackLLM(BaseLLM):
             spec, llm = self.attempts[index]
             label = f"{spec.label}/{spec.model}"
             print(f"[models] trying {label}", flush=True)
-            try:
-                result = llm.call(
-                    messages=messages,
-                    tools=tools,
-                    callbacks=callbacks,
-                    available_functions=available_functions,
-                    from_task=from_task,
-                    from_agent=from_agent,
-                    response_model=response_model,
-                )
-            except (KeyboardInterrupt, SystemExit):
-                raise
-            except Exception as error:
-                failures.append(f"{label}: {type(error).__name__}")
-                print(f"[models] {label} failed ({type(error).__name__}); trying next", flush=True)
+            result = None
+            provider_failed = False
+            for attempt in range(2):
+                try:
+                    result = llm.call(
+                        messages=messages,
+                        tools=tools,
+                        callbacks=callbacks,
+                        available_functions=available_functions,
+                        from_task=from_task,
+                        from_agent=from_agent,
+                        response_model=response_model,
+                    )
+                    if is_repetitive_response(result):
+                        raise ValueError("degenerate repetitive model response")
+                    break
+                except (KeyboardInterrupt, SystemExit):
+                    raise
+                except Exception as error:
+                    delay = rate_limit_retry_delay(error) if attempt == 0 else None
+                    if delay is not None:
+                        print(f"[models] {label} rate limited; retrying in {delay:g}s", flush=True)
+                        time.sleep(delay)
+                        continue
+                    failures.append(f"{label}: {type(error).__name__}")
+                    print(f"[models] {label} failed ({type(error).__name__}); trying next", flush=True)
+                    provider_failed = True
+                    break
+            if provider_failed:
                 continue
             self.active_index = index
             print(f"[models] completed with {label}", flush=True)

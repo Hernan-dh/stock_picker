@@ -1,6 +1,8 @@
 find_trending_companies:
   description: >
-    Find the top trending companies in the news in {sector} as of {current_date} by searching the latest news. Find new companies that you've not found before.
+    Find exactly 3 publicly traded companies trending in {sector} as of {current_date} by searching current news.
+    Return each company once, include its ticker and cite the source URLs that support why it is trending.
+    Use at most 2 focused search calls; combine companies in a query when practical.
     {language_instruction}
   expected_output: >
     A list of trending companies in {sector}
@@ -9,7 +11,9 @@ find_trending_companies:
 
 research_trending_companies:
   description: >
-    Given a list of trending companies, provide detailed analysis of each company in a report by searching online. Ensure research is up to date as of {current_date}.
+    Given the 3 trending companies, provide a concise analysis of each by searching current, credible sources.
+    Cover market position, material risks, catalysts, and investment potential as of {current_date}; cite source URLs and never repeat a company.
+    Use at most 3 focused search calls, normally one per company, and rely on the 4 results returned by each search.
     {language_instruction}
   expected_output: >
     A report containing detailed analysis of each company
@@ -20,7 +24,7 @@ research_trending_companies:
 
 pick_best_company:
   description: >
-    Analyze the research findings and pick the best company for investment. Ensure research is up to date as of {current_date}.
+    Analyze the research findings and pick exactly one company as the strongest candidate. Ensure research is up to date as of {current_date}.
     Send a push notification to the user with the decision and 1 sentence rationale.
     Then respond with a detailed report on why you chose this company, and which companies were not selected.
     {language_instruction}
