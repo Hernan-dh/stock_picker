@@ -27,6 +27,7 @@ UI_TEXT = {
         "instruction": "Write the complete research and final recommendation in English.",
         "error": "I couldn't complete this stock analysis. Please try again.",
         "examples": "Example sectors",
+        "disclaimer": "**Disclaimer:** This report is for research and informational purposes only. It is not financial advice.",
     },
     "Español": {
         "subtitle": "SELECCIÓN DE MERCADO MULTIAGENTE",
@@ -36,6 +37,7 @@ UI_TEXT = {
         "instruction": "Escribí la investigación y la recomendación final completas en español.",
         "error": "No pude completar este análisis bursátil. Intentá nuevamente.",
         "examples": "Sectores de ejemplo",
+        "disclaimer": "**Aviso:** Este informe tiene fines exclusivamente informativos y de investigación. No constituye asesoramiento financiero.",
     },
 }
 
@@ -105,7 +107,7 @@ def analyze_sector(message: str, _history, language: str) -> str:
     except Exception as error:
         print(f"[web] stock analysis failed ({type(error).__name__})", flush=True)
         return text["error"]
-    return result.raw
+    return f"{text['disclaimer']}\n\n{result.raw}"
 
 
 def submit_sector(message: str, history: list[dict], language: str):
