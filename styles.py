@@ -40,6 +40,13 @@ button.primary,button[variant='primary'] { border-color:var(--acid)!important; b
 @media (max-width:640px) { .gradio-container{padding:22px 14px 34px!important} #title-row{flex-wrap:wrap!important;gap:16px!important} #language-control{width:100%!important;margin-left:0!important} .sector-examples{flex-direction:column!important} #stock-chat-en,#stock-chat-es{height:500px!important;min-height:500px!important;box-shadow:8px 8px 0 rgb(0 0 0 / 18%)!important} }
 """
 
+CSS += r"""
+.gradio-container .message-row.user-row .message *,
+.gradio-container .message-row[data-role='user'] .message * {
+    color: #111412 !important;
+}
+"""
+
 JS = r"""
 () => {
   document.title = (navigator.language || '').toLowerCase().startsWith('es') ? 'Selector de acciones' : 'Stock Picker';

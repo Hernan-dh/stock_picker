@@ -40,3 +40,7 @@ The Gradio interface defaults to English unless the browser language starts with
 ## Related decisions
 
 - [Continuous documentation and safe publishing](decisions/0001-continuous-documentation-and-safe-publishing.md)
+
+## Chat feedback
+
+User messages remain visible while a localized process description is displayed. The final response or error replaces the temporary status. Research forms render the user turn before queued work and disable submission until completion; Deep Research streams preparation, search and report updates through ChatInterface.

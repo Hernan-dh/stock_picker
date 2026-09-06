@@ -19,6 +19,10 @@ Each search returns at most four Serper results. The finder is limited to two fo
 
 Run `./scripts/verify.sh`, or on Windows run `uv run python scripts/verify.py`.
 
+The verifier runs tests through `uv run --project` so they always use this project's environment and installed `src/stock_picker` package. This also supports calling `python scripts/verify.py` or `python scripts/publish.py` with global Python. `uv` must be available on PATH; the first run may install dependencies. There is no need to activate or deactivate a virtual environment.
+
+If `deactivate` is not recognized in PowerShell, no standard Python virtual environment is activated in that shell. If imports fail with `No module named 'stock_picker'`, run `uv sync` from the repository and retry verification. The CRLF-to-LF Git warning is informational and does not cause test failures.
+
 Enable the repository-managed pre-commit hook once per clone with `uv run python scripts/install_hooks.py`. GitHub Actions runs the same verifier.
 
 ## Documentation

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import re
+import shutil
 import subprocess
 import sys
 import tokenize
@@ -74,7 +75,14 @@ def check_existing_tests(verification: Verification, files: list[Path]) -> None:
     if not dependency_file.is_file():
         dependency_file = ROOT / "pyproject.toml"
     dependencies = dependency_file.read_text(encoding="utf-8").lower()
-    command = [sys.executable, "-m", "pytest"] if "pytest" in dependencies else [sys.executable, "-m", "unittest", "discover"]
+    uv = shutil.which("uv")
+    if uv is None:
+        verification.error("Tests require uv. Install uv and run 'uv sync' in the project directory.")
+        return
+    # Use this project's installed package and dependencies even when the
+    # verifier (or publish.py) was started with a global Python interpreter.
+    command = [uv, "run", "--project", str(ROOT), "python", "-m"]
+    command += ["pytest"] if "pytest" in dependencies else ["unittest", "discover"]
     verification.run("tests", command)
 
 
