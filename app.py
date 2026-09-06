@@ -28,6 +28,7 @@ UI_TEXT = {
         "error": "I couldn't complete this stock analysis. Please try again.",
         "examples": "Example sectors",
         "disclaimer": "**Disclaimer:** This report is for research and informational purposes only. It is not financial advice.",
+        "status": "**Pipeline running**\n\n1. **Trending Company Finder** is using **Serper web search** (up to 2 focused searches) to identify three trending public companies.\n2. **Financial Researcher** will use **Serper web search** (up to 3 focused searches) to assess market position, risks, catalysts, and potential.\n3. **Stock Picker** will synthesize the research and select one candidate.",
     },
     "Español": {
         "subtitle": "SELECCIÓN DE MERCADO MULTIAGENTE",
@@ -38,6 +39,7 @@ UI_TEXT = {
         "error": "No pude completar este análisis bursátil. Intentá nuevamente.",
         "examples": "Sectores de ejemplo",
         "disclaimer": "**Aviso:** Este informe tiene fines exclusivamente informativos y de investigación. No constituye asesoramiento financiero.",
+        "status": "**Flujo en ejecución**\n\n1. **Trending Company Finder** está usando la **búsqueda web de Serper** (hasta 2 búsquedas focalizadas) para identificar tres empresas cotizadas en tendencia.\n2. **Financial Researcher** usará la **búsqueda web de Serper** (hasta 3 búsquedas focalizadas) para evaluar la posición de mercado, riesgos, catalizadores y potencial.\n3. **Stock Picker** sintetizará la investigación y seleccionará una candidata.",
     },
 }
 
@@ -115,7 +117,7 @@ def submit_sector(message: str, history: list[dict], language: str):
     message = (message or "").strip()
     if not message:
         raise gr.Error("Ingresá un sector." if language == "Español" else "Enter a sector.")
-    status = "Analizando el sector y evaluando empresas para seleccionar una candidata…" if language == "Español" else "Analyzing the sector and evaluating companies to select a candidate…"
+    status = UI_TEXT[language if language in UI_TEXT else "English"]["status"]
     return gr.Textbox(value="", interactive=False), [
         *(history or []),
         {"role": "user", "content": message},
