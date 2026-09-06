@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import os
 import random
+import queue
+import threading
 from datetime import date
 from pathlib import Path
 
 import gradio as gr
-from report_export import download_controls, prepare_with_downloads, finish_with_downloads
+from report_export import download_controls, prepare_with_downloads, finish_with_downloads, finish_with_progress_downloads
 from dotenv import load_dotenv
 
 from stock_picker.crew import StockPicker
@@ -28,7 +30,7 @@ UI_TEXT = {
         "error": "I couldn't complete this stock analysis. Please try again.",
         "examples": "Example sectors",
         "disclaimer": "**Disclaimer:** This report is for research and informational purposes only. It is not financial advice.",
-        "status": "**Pipeline running**\n\n1. **Trending Company Finder** is using **Serper web search** (up to 2 focused searches) to identify three trending public companies.\n2. **Financial Researcher** will use **Serper web search** (up to 3 focused searches) to assess market position, risks, catalysts, and potential.\n3. **Stock Picker** will synthesize the research and select one candidate.",
+        "status": "**Trending Company Finder** is using **Serper web search** (up to 2 focused searches) to identify three trending public companies.",
     },
     "Español": {
         "subtitle": "SELECCIÓN DE MERCADO MULTIAGENTE",
@@ -39,7 +41,7 @@ UI_TEXT = {
         "error": "No pude completar este análisis bursátil. Intentá nuevamente.",
         "examples": "Sectores de ejemplo",
         "disclaimer": "**Aviso:** Este informe tiene fines exclusivamente informativos y de investigación. No constituye asesoramiento financiero.",
-        "status": "**Flujo en ejecución**\n\n1. **Trending Company Finder** está usando la **búsqueda web de Serper** (hasta 2 búsquedas focalizadas) para identificar tres empresas cotizadas en tendencia.\n2. **Financial Researcher** usará la **búsqueda web de Serper** (hasta 3 búsquedas focalizadas) para evaluar la posición de mercado, riesgos, catalizadores y potencial.\n3. **Stock Picker** sintetizará la investigación y seleccionará una candidata.",
+        "status": "**Trending Company Finder** está usando la **búsqueda web de Serper** (hasta 2 búsquedas focalizadas) para identificar tres empresas cotizadas en tendencia.",
     },
 }
 
@@ -94,14 +96,14 @@ def initialize_language(browser_language: str):
     return language, header, english_group, spanish_group
 
 
-def analyze_sector(message: str, _history, language: str) -> str:
+def analyze_sector(message: str, _history, language: str, task_callback=None) -> str:
     language = language if language in UI_TEXT else "English"
     text = UI_TEXT[language]
     sector = (message or "").strip()
     if not sector:
         return text["greeting"]
     try:
-        result = StockPicker(llm=fallback_llm()).crew().kickoff(inputs={
+        result = StockPicker(llm=fallback_llm(), task_callback=task_callback).crew().kickoff(inputs={
             "sector": sector,
             "current_date": date.today().isoformat(),
             "language_instruction": text["instruction"],
@@ -140,6 +142,44 @@ def finish_submission(history: list[dict], language: str):
     ], gr.Button(interactive=True)
 
 
+def finish_submission_progress(history: list[dict], language: str):
+    """Stream sequential CrewAI task progress into the pending chat message."""
+    if len(history) < 2 or history[-2]["role"] != "user":
+        yield gr.Textbox(interactive=True), history, gr.Button(interactive=True), True
+        return
+    content = history[-2]["content"]
+    sector = content if isinstance(content, str) else "\n".join(block["text"] for block in content if block.get("type") == "text")
+    text = UI_TEXT[language]
+    updates = queue.Queue()
+    stages = (
+        "**Financial Researcher** is using **Serper web search** to assess the shortlisted companies.",
+        "**Stock Picker** is synthesizing the research and selecting one candidate.",
+    ) if language == "English" else (
+        "**Financial Researcher** está usando la **búsqueda web de Serper** para evaluar las empresas preseleccionadas.",
+        "**Stock Picker** está sintetizando la investigación y seleccionando una candidata.",
+    )
+    callback_count = 0
+    def on_task_complete(_output):
+        nonlocal callback_count
+        callback_count += 1
+        if callback_count <= len(stages):
+            updates.put((stages[callback_count - 1], False))
+    def work():
+        try:
+            updates.put((analyze_sector(sector, history[:-2], language, task_callback=on_task_complete), True))
+        except Exception as error:
+            print(f"[web] stock analysis failed ({type(error).__name__})", flush=True)
+            updates.put((text["error"], True))
+    thread = threading.Thread(target=work, daemon=True)
+    thread.start()
+    while thread.is_alive() or not updates.empty():
+        try:
+            update, completed = updates.get(timeout=0.1)
+        except queue.Empty:
+            continue
+        yield gr.Textbox(interactive=completed), [*history[:-1], {"role": "assistant", "content": update}], gr.Button(interactive=completed), completed
+
+
 def submit_english(message: str, history: list[dict]):
     return submit_sector(message, history, "English")
 
@@ -152,8 +192,16 @@ def finish_english(history: list[dict]):
     return finish_submission(history, "English")
 
 
+def finish_english_progress(history: list[dict]):
+    yield from finish_submission_progress(history, "English")
+
+
 def finish_spanish(history: list[dict]):
     return finish_submission(history, "Español")
+
+
+def finish_spanish_progress(history: list[dict]):
+    yield from finish_submission_progress(history, "Español")
 
 
 initial = UI_TEXT["English"]
@@ -189,14 +237,14 @@ with gr.Blocks(delete_cache=(3600, 86400)) as demo:
             prepare_with_downloads(submit_english), [english_textbox, english_chatbot],
             [english_textbox, english_chatbot, english_submit, english_report, english_download], queue=False,
         ).success(
-            finish_with_downloads(finish_english, UI_TEXT["English"]["error"]), english_chatbot,
+            finish_with_progress_downloads(finish_english_progress, UI_TEXT["English"]["error"]), english_chatbot,
             [english_textbox, english_chatbot, english_submit, english_report, english_download], show_progress="hidden",
         )
         english_textbox.submit(
             prepare_with_downloads(submit_english), [english_textbox, english_chatbot],
             [english_textbox, english_chatbot, english_submit, english_report, english_download], queue=False,
         ).success(
-            finish_with_downloads(finish_english, UI_TEXT["English"]["error"]), english_chatbot,
+            finish_with_progress_downloads(finish_english_progress, UI_TEXT["English"]["error"]), english_chatbot,
             [english_textbox, english_chatbot, english_submit, english_report, english_download], show_progress="hidden",
         )
 
@@ -222,14 +270,14 @@ with gr.Blocks(delete_cache=(3600, 86400)) as demo:
             prepare_with_downloads(submit_spanish), [spanish_textbox, spanish_chatbot],
             [spanish_textbox, spanish_chatbot, spanish_submit, spanish_report, spanish_download], queue=False,
         ).success(
-            finish_with_downloads(finish_spanish, UI_TEXT["Español"]["error"]), spanish_chatbot,
+            finish_with_progress_downloads(finish_spanish_progress, UI_TEXT["Español"]["error"]), spanish_chatbot,
             [spanish_textbox, spanish_chatbot, spanish_submit, spanish_report, spanish_download], show_progress="hidden",
         )
         spanish_textbox.submit(
             prepare_with_downloads(submit_spanish), [spanish_textbox, spanish_chatbot],
             [spanish_textbox, spanish_chatbot, spanish_submit, spanish_report, spanish_download], queue=False,
         ).success(
-            finish_with_downloads(finish_spanish, UI_TEXT["Español"]["error"]), spanish_chatbot,
+            finish_with_progress_downloads(finish_spanish_progress, UI_TEXT["Español"]["error"]), spanish_chatbot,
             [spanish_textbox, spanish_chatbot, spanish_submit, spanish_report, spanish_download], show_progress="hidden",
         )
 

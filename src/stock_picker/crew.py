@@ -42,8 +42,9 @@ class StockPicker():
     agents: list[BaseAgent]
     tasks: list[Task]
 
-    def __init__(self, llm):
+    def __init__(self, llm, task_callback=None):
         self.llm = llm
+        self.task_callback = task_callback
 
     @agent
     def trending_company_finder(self) -> Agent:
@@ -95,4 +96,5 @@ class StockPicker():
             process=Process.sequential,
             verbose=True,
             tracing=False,
+            task_callback=self.task_callback,
         )
