@@ -265,7 +265,8 @@ with gr.Blocks(delete_cache=(3600, 86400)) as demo:
             )
             spanish_submit = gr.Button(spanish["submit"], variant="primary", scale=0)
         for button, sector in zip(spanish_buttons, SUGGESTED_SECTORS):
-            button.click(lambda value=sector: value, outputs=spanish_textbox)
+            localized_sector = SPANISH_SECTOR_LABELS[sector]
+            button.click(lambda value=localized_sector: value, outputs=spanish_textbox)
         spanish_submit.click(
             prepare_with_downloads(submit_spanish), [spanish_textbox, spanish_chatbot],
             [spanish_textbox, spanish_chatbot, spanish_submit, spanish_report, spanish_download], queue=False,
