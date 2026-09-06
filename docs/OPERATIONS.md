@@ -41,3 +41,5 @@ Provide `--title` and `--description` to avoid external metadata generation. Com
 - If verification fails, fix every reported item and rerun it.
 - If metadata generation fails, inspect the provider attempt names, verify local keys and quotas, or provide commit metadata manually.
 - Never recover with a force-push.
+
+Gradio 6 represents Chatbot input content as typed blocks. The submission handler extracts text before calling the research backend. When checking chat changes, round-trip history through Chatbot.postprocess and Chatbot.preprocess; testing only plain string dictionaries misses this conversion.
