@@ -36,6 +36,13 @@ body { background-image:linear-gradient(rgb(255 255 255 / 2.5%) 1px,transparent 
 textarea,input[type='text'] { min-height:50px!important; padding:13px 14px!important; border:1px solid var(--border)!important; background:var(--surface)!important; color:var(--text)!important; font:400 14px/1.45 var(--sans)!important; }
 textarea:focus,input[type='text']:focus { border-color:var(--acid)!important; outline:none!important; box-shadow:0 0 0 1px var(--acid)!important; }
 button { min-height:50px!important; border:1px solid var(--border)!important; background:var(--surface)!important; color:var(--text)!important; font:500 10px var(--mono)!important; letter-spacing:.1em!important; text-transform:uppercase!important; }
+#download-controls-en, #download-controls-es { align-items:center; gap:8px; margin:0; padding:6px 8px; border:1px solid var(--border); background:var(--surface); }
+#download-controls-en > div, #download-controls-es > div { margin:0; }
+#download-controls-en .format-label, #download-controls-es .format-label { display:flex; align-items:center; margin:0; color:var(--text); font:400 16px var(--mono); }
+#download-controls-en label, #download-controls-es label { display:none; }
+#download-controls-en button, #download-controls-es button { min-height:34px!important; border:0!important; background:var(--acid)!important; color:var(--bg)!important; }
+#download-controls-en button:hover, #download-controls-es button:hover { filter:brightness(1.12); }
+#download-controls-en .wrap, #download-controls-es .wrap { min-width:150px; }
 button.primary,button[variant='primary'] { border-color:var(--acid)!important; background:var(--acid)!important; color:var(--bg)!important; }
 @media (max-width:640px) { .gradio-container{padding:22px 14px 34px!important} #title-row{flex-wrap:wrap!important;gap:16px!important} #language-control{width:100%!important;margin-left:0!important} .sector-examples{flex-direction:column!important} #stock-chat-en,#stock-chat-es{height:500px!important;min-height:500px!important;box-shadow:8px 8px 0 rgb(0 0 0 / 18%)!important} }
 """
