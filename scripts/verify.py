@@ -13,13 +13,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MAX_FILE_SIZE = 5 * 1024 * 1024
 MAX_SECRET_SCAN_SIZE = 1024 * 1024
-ESSENTIAL_DOCS = ("AGENTS.md", "docs/ARCHITECTURE.md", "docs/OPERATIONS.md", "docs/decisions/README.md")
+ESSENTIAL_DOCS = ("README.md", "LICENSE", ".env.example", "AGENTS.md", "docs/ARCHITECTURE.md", "docs/OPERATIONS.md", "docs/decisions/README.md")
 PRIVATE_NAMES = {".env", "credentials.json", "secrets.json", "secrets.yaml", "id_rsa", "id_ed25519"}
 PRIVATE_SUFFIXES = {".key", ".pem", ".p12", ".pfx"}
 GENERATED_PARTS = {"__pycache__", ".pytest_cache", ".venv", "venv", "node_modules"}
 TEXT_SUFFIXES = {".css", ".env", ".html", ".ini", ".js", ".json", ".md", ".py", ".sh", ".toml", ".txt", ".yaml", ".yml"}
 TEXT_NAMES = {".env.example", ".gitattributes", "AGENTS.md", "Dockerfile", "pre-commit"}
 SECRET_PATTERNS = (
+    re.compile(r"AIza[0-9A-Za-z_-]{35}"),
+    re.compile(r"\b(?:gsk_|github_pat_|sk-or-v1-)[A-Za-z0-9_-]{20,}"),
     re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
     re.compile(r"\bgh[opurs]_[A-Za-z0-9_]{30,}\b"),
@@ -67,22 +69,20 @@ def check_python_syntax(verification: Verification, files: list[Path]) -> None:
 
 
 def check_existing_tests(verification: Verification, files: list[Path]) -> None:
-    tests = [path for path in files if path.suffix == ".py" and path.is_file() and (path.name.startswith("test_") or "tests" in path.relative_to(ROOT).parts)]
+    tests = [path for path in files if path.suffix == ".py" and path.is_file() and path.name.startswith("test_")]
     if not tests:
-        print("[skip] no Python tests")
+        verification.error("No regression tests found")
         return
-    dependency_file = ROOT / "requirements.txt"
-    if not dependency_file.is_file():
-        dependency_file = ROOT / "pyproject.toml"
-    dependencies = dependency_file.read_text(encoding="utf-8").lower()
-    uv = shutil.which("uv")
-    if uv is None:
-        verification.error("Tests require uv. Install uv and run 'uv sync' in the project directory.")
-        return
-    # Use this project's installed package and dependencies even when the
-    # verifier (or publish.py) was started with a global Python interpreter.
-    command = [uv, "run", "--project", str(ROOT), "python", "-m"]
-    command += ["pytest"] if "pytest" in dependencies else ["unittest", "discover"]
+    if (ROOT / "pyproject.toml").is_file():
+        uv = shutil.which("uv")
+        if uv is None:
+            verification.error("Tests require uv. Install uv and run uv sync first.")
+            return
+        command = [uv, "run", "--project", str(ROOT), "python", "-m", "unittest", "discover"]
+    else:
+        candidates = [ROOT / ".venv" / "Scripts" / "python.exe", ROOT / ".venv" / "bin" / "python"]
+        python = next((str(path) for path in candidates if path.is_file()), sys.executable)
+        command = [python, "-m", "unittest", "discover"]
     verification.run("tests", command)
 
 
@@ -92,7 +92,8 @@ def check_files(verification: Verification, files: list[Path]) -> None:
         if not path.is_file():
             continue
         relative = path.relative_to(ROOT)
-        if path.name.lower() in PRIVATE_NAMES or path.suffix.lower() in PRIVATE_SUFFIXES:
+        private_environment = path.name.startswith(".env.") and path.name != ".env.example"
+        if private_environment or path.name.lower() in PRIVATE_NAMES or path.suffix.lower() in PRIVATE_SUFFIXES:
             verification.error(f"Private file is not allowed: {relative}")
         if {part.lower() for part in relative.parts} & GENERATED_PARTS:
             verification.error(f"Generated file is not ignored: {relative}")

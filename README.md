@@ -1,64 +1,58 @@
-# StockPicker Crew
+# Stock Picker
 
-Welcome to the StockPicker Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+A bilingual research assistant that finds trending companies in a sector, researches them, and proposes one candidate with supporting reasoning.
 
-## Installation
+## Attribution
 
-Ensure you have Python >=3.10 <3.14 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling, offering a seamless setup and execution experience.
+Project built from [Ed Donner's agentic AI engineering course](https://github.com/ed-donner/agents). The upstream MIT copyright notice is preserved in [LICENSE](LICENSE). No endorsement by the course author is implied.
 
-First, if you haven't already, install uv:
+## Run locally
 
-```bash
-pip install uv
+Python 3.12 and uv are the documented development baseline.  Run the following commands from this repository's root.
+
+```sh
+uv sync
 ```
 
-Next, navigate to your project directory and install the dependencies:
+Copy `.env.example` to `.env` (`Copy-Item .env.example .env` in PowerShell, or `cp .env.example .env` on Linux/macOS), then replace only the placeholders for the providers you intend to use. Leave unused credentials empty. Never commit the real `.env`.
 
-(Optional) Lock the dependencies and install them by using the CLI command:
-```bash
-crewai install
-```
-### Customizing
+Configure `SERPER_API_KEY` and at least one model-provider key. Open `http://127.0.0.1:7860` and enter a market sector. Use `uv run crewai run` for the CLI.
 
-Configure `SERPER_API_KEY`, plus at least one of `GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY` in `.env`.
-
-- Modify `src/stock_picker/config/agents.yaml` to define your agents
-- Modify `src/stock_picker/config/tasks.yaml` to define your tasks
-- Modify `src/stock_picker/crew.py` to add your own logic, tools and specific args
-- Modify `src/stock_picker/main.py` to add custom inputs for your agents and tasks
-
-## Running the Project
-
-To kickstart your crew of AI agents and begin task execution, run this from the root folder of your project:
-
-```bash
-$ crewai run
-```
-
-This command initializes the stock_picker Crew, assembling the agents and assigning them tasks as defined in your configuration.
-
-Every agent uses the same quality-first, per-call model fallback: Gemini 3.7 Flash, Gemini 3.6 Flash, Groq GPT-OSS 120B, and OpenRouter NVIDIA Nemotron 3 Super Free. Failed or repetitive responses move to the next provider. Missing provider keys are skipped.
-
-To run the bilingual Gradio interface:
-
-```bash
+```sh
 uv run python app.py
 ```
 
-Open `http://127.0.0.1:7860`. The interface accepts a market sector and returns the crew's final stock selection report.
+## Architecture
 
-This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
+```text
+Gradio / CLI sector -> company finder -> structured research -> candidate selection -> report
+```
 
-## Understanding Your Crew
+See [architecture](docs/ARCHITECTURE.md) for components, data flow and trust boundaries, and [operations](docs/OPERATIONS.md) for configuration and recovery.
 
-The stock_picker Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
+## Technologies
 
-## Support
+Python, CrewAI, Gradio 6, Pydantic, Serper, YAML, uv and unittest; Gemini, Groq and OpenRouter model providers.
 
-For support, questions, or feedback regarding the StockPicker Crew or crewAI.
-- Visit our [documentation](https://docs.crewai.com)
-- Reach out to us through our [GitHub repository](https://github.com/joaomdmoura/crewai)
-- [Join our Discord](https://discord.com/invite/X4JWnZnxPb)
-- [Chat with our docs](https://chatg.pt/DWjSBZn)
+## Reproducible tests
 
-Let's create wonders together with the power and simplicity of crewAI.
+After installing the dependencies above:
+
+```sh
+uv run python -m unittest discover -v
+uv run python scripts/verify.py
+```
+
+Coverage: Repetitive-response rejection and rate-limit parsing, plus real Gradio message serialization, repeated turns and error recovery with backend calls mocked. Tests run without real credentials or paid API calls. They do not measure model quality, live provider availability, or full browser behavior. CI installs dependencies and runs the same verifier on pushes and pull requests.
+
+## Limitations
+
+The selection is an unvalidated model judgment, not investment advice or a return forecast. There is no backtest, trading connection or real-time price feed. Bounded searches can miss relevant companies. Requests are independent and generated output paths are shared. Public operation needs authentication, usage limits and isolated output storage.
+
+Prompts and relevant context are sent to external model/search providers. Do not submit secrets or confidential data. Provider names in source code are configuration, not promises of current availability, pricing, or free access.
+
+## Public repository and license
+
+The repository includes a placeholder-only [.env.example](.env.example); local credentials, caches and generated artifacts are excluded by [.gitignore](.gitignore). See [operations](docs/OPERATIONS.md) for verification and publication instructions.
+
+The code is distributed under the [MIT license](LICENSE). Dependencies retain their own licenses. Biographical material, third-party documents, logos and linked content are not relicensed by this code license. Publishing scripts can send code diffs to external models when generating commit text; use explicit metadata to avoid that step.

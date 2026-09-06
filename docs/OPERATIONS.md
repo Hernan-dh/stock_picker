@@ -43,3 +43,19 @@ Provide `--title` and `--description` to avoid external metadata generation. Com
 - Never recover with a force-push.
 
 Gradio 6 represents Chatbot input content as typed blocks. The submission handler extracts text before calling the research backend. When checking chat changes, round-trip history through Chatbot.postprocess and Chatbot.preprocess; testing only plain string dictionaries misses this conversion.
+
+## Public-source verification
+
+See [README](../README.md) for the reproducible setup. CI installs dependencies before invoking the verifier. Tests disable dotenv loading and provider telemetry and use synthetic inputs or mocked external calls; passing unit tests does not certify live services or production security.
+
+The verifier invokes tests through uv in this repository so imports resolve even when verification is started from global Python. uv must be on PATH; use uv sync --locked for the committed dependency resolution.
+
+
+## Publication review
+
+Before publishing, run the verifier and review git diff and git status --short,
+especially new files. Keep real credentials in local environment files or hosting
+secrets, and preserve upstream license notices. Automated secret checks cover
+recognizable patterns in current source files; they do not certify the absence of
+secrets or scan every historical commit, remote ref, hosting log or fork. Removing
+a file from the working tree does not remove it from Git history.
