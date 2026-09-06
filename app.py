@@ -45,6 +45,18 @@ SECTORS = (
     "Cybersecurity", "Renewable Energy", "Biotechnology",
 )
 SUGGESTED_SECTORS = random.sample(SECTORS, k=3)
+SPANISH_SECTOR_LABELS = {
+    "Technology": "Tecnología",
+    "Healthcare": "Salud",
+    "Financial Services": "Servicios financieros",
+    "Energy": "Energía",
+    "Consumer Discretionary": "Consumo discrecional",
+    "Industrials": "Industriales",
+    "Semiconductors": "Semiconductores",
+    "Cybersecurity": "Ciberseguridad",
+    "Renewable Energy": "Energía renovable",
+    "Biotechnology": "Biotecnología",
+}
 
 
 def header_html(language: str) -> str:
@@ -193,7 +205,7 @@ with gr.Blocks(delete_cache=(3600, 86400)) as demo:
         spanish_report, spanish_download = download_controls("Español")
         gr.Markdown(spanish["examples"], elem_classes="sector-examples-label")
         with gr.Row(elem_id="sector-examples-es", elem_classes="sector-examples"):
-            spanish_buttons = [gr.Button(sector) for sector in SUGGESTED_SECTORS]
+            spanish_buttons = [gr.Button(SPANISH_SECTOR_LABELS[sector]) for sector in SUGGESTED_SECTORS]
         with gr.Row(elem_id="sector-input-row-es", elem_classes="sector-input-row"):
             spanish_textbox = gr.Textbox(
                 placeholder=spanish["placeholder"], show_label=False, container=False,
