@@ -22,6 +22,19 @@ Configure `SERPER_API_KEY` and at least one model-provider key. Open `http://127
 uv run python app.py
 ```
 
+## Download results
+
+After a request completes, choose Markdown (.md), Word (.docx) or PDF (.pdf),
+then select **Prepare download** and click the generated file. Spanish controls
+use **Preparar descarga**. Downloads contain the last completed report in that
+chat, including sources. Starting another request clears the previous download.
+
+Markdown preserves the original result. DOCX and PDF retain headings, lists,
+tables and source URLs with a simplified layout; they do not reproduce the chat
+styling or fetch external images. PDF uses an embedded font for English and
+Spanish; glyph coverage for other scripts is limited. Files are temporary, so
+save a local copy.
+
 ## Architecture
 
 ```text

@@ -59,3 +59,18 @@ secrets, and preserve upstream license notices. Automated secret checks cover
 recognizable patterns in current source files; they do not certify the absence of
 secrets or scan every historical commit, remote ref, hosting log or fork. Removing
 a file from the working tree does not remove it from Git history.
+
+## Downloadable reports
+
+Install the updated dependencies before starting the app. No LibreOffice,
+browser renderer or external document-conversion service is required. PDF fonts
+are bundled with ReportLab. Generated files are built in a temporary directory,
+copied to the download component's Gradio cache, and the staging directory is
+removed immediately. Blocks checks the cache hourly and removes files older
+than 24 hours. Restarts or ephemeral hosting storage may remove downloads sooner.
+No generated report is placed in the repository or added to allowed_paths.
+
+Verification includes tests for Unicode text, long PDFs, DOCX tables, source
+URLs, invalid formats, empty reports and clearing stale download state. Test
+live downloads after deployment in both interface languages; MD should match
+the completed response and PDF/DOCX should open with legible headings and tables.

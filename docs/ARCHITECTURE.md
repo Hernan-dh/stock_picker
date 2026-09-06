@@ -44,3 +44,13 @@ The Gradio interface defaults to English unless the browser language starts with
 ## Chat feedback
 
 User messages remain visible while a localized process description is displayed. The final response or error replaces the temporary status. Research forms render the user turn before queued work and disable submission until completion; Deep Research streams preparation, search and report updates through ChatInterface.
+
+## Result downloads
+
+report_export.py converts completed Markdown to MD, DOCX (python-docx) or PDF
+(ReportLab with an embedded Vera font). markdown-it-py parses report structure;
+raw HTML is treated as text and external images are never retrieved. Each
+localized chat stores its completed report in a Gradio State. Pending requests,
+failed runs and cleared chats do not supply a downloadable report. Export is
+requested separately, so conversion failures do not discard the chat response.
+The reusable module is kept in each standalone deployment repository.
