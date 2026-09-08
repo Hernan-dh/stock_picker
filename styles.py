@@ -32,7 +32,7 @@ body { background-image:linear-gradient(rgb(255 255 255 / 2.5%) 1px,transparent 
 #stock-chat-en,#stock-chat-es { height:520px!important; min-height:520px!important; border:1px solid var(--border)!important; background:rgb(24 28 25 / 94%)!important; box-shadow:18px 18px 0 rgb(0 0 0 / 18%)!important; }
 .message-row .message,.message-row .message-bubble { font-size:14px!important; line-height:1.6!important; }
 .message-row.user-row .message,.message-row[data-role='user'] .message { background:var(--acid)!important; color:var(--bg)!important; }
-.message-row.bot-row .message,.message-row[data-role='assistant'] .message { border-left:2px solid var(--orange)!important; background:var(--raised)!important; color:var(--text)!important; }
+.message-row.bot-row .message,.message-row.bot-row .message-bubble,.message-row[data-role='assistant'] .message,.message-row[data-role='assistant'] .message-bubble { border-left:2px solid var(--orange)!important; background:var(--raised)!important; color:var(--text)!important; padding-left:18px!important; }
 textarea,input[type='text'] { min-height:50px!important; padding:13px 14px!important; border:1px solid var(--border)!important; background:var(--surface)!important; color:var(--text)!important; font:400 14px/1.45 var(--sans)!important; }
 textarea:focus,input[type='text']:focus { border-color:var(--acid)!important; outline:none!important; box-shadow:0 0 0 1px var(--acid)!important; }
 button { min-height:50px!important; border:1px solid var(--border)!important; background:var(--surface)!important; color:var(--text)!important; font:500 10px var(--mono)!important; letter-spacing:.1em!important; text-transform:uppercase!important; }
@@ -65,6 +65,23 @@ CSS += r"""
     color: var(--muted) !important;
     box-shadow: none !important;
 }
+"""
+
+CSS += r"""
+/* Shared chat typography scale: readable prose, compact controls. */
+.stock-headings h1 { font-size:clamp(1.8rem,4vw,2.6rem)!important; }
+.chatbot, .chatbot * { font-family:var(--sans)!important; }
+.message-row :is(.message,.message-bubble,.bubble),.message-row :is(.message,.message-bubble,.bubble) :is(p,li) { font-size:16px!important; line-height:1.65!important; }
+.message-row :is(.message,.message-bubble,.bubble) h1 { font-size:24px!important; line-height:1.25!important; }
+.message-row :is(.message,.message-bubble,.bubble) h2 { font-size:20px!important; line-height:1.3!important; }
+.message-row :is(.message,.message-bubble,.bubble) h3 { font-size:18px!important; line-height:1.35!important; }
+textarea,input[type='text'] { font:400 16px/1.5 var(--sans)!important; }
+button { font:500 11px/1.2 var(--mono)!important; }
+.message-row :is(code,pre) { font-family:var(--mono)!important; }
+.sector-examples button { font:500 14px/1.45 var(--sans)!important; text-transform:none!important; }
+#language-label p,.sector-examples-label p { font-size:10px!important; }
+#download-controls-en .format-label,#download-controls-es .format-label { font-size:14px!important; }
+@media (max-width:640px) { .message-row :is(.message,.message-bubble,.bubble),.message-row :is(.message,.message-bubble,.bubble) :is(p,li) { font-size:15px!important; } }
 """
 
 JS = r"""
