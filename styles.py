@@ -52,6 +52,19 @@ CSS += r"""
 .gradio-container .message-row[data-role='user'] .message * {
     color: #111412 !important;
 }
+
+#stock-chat-en .icon-button, #stock-chat-es .icon-button,
+#stock-chat-en button.icon-button, #stock-chat-es button.icon-button {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 4px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+    box-shadow: none !important;
+}
 """
 
 JS = r"""
