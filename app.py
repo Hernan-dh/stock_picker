@@ -51,6 +51,30 @@ SECTORS = (
     "Cybersecurity", "Renewable Energy", "Biotechnology",
 )
 SUGGESTED_SECTORS = random.sample(SECTORS, k=3)
+NEW_REPORT_COMMAND = "/new-report"
+
+
+def text_content(content) -> str:
+    return content if isinstance(content, str) else "\n".join(
+        block["text"] for block in content if block.get("type") == "text"
+    )
+
+
+def prior_report(history: list[dict]) -> str | None:
+    for message in reversed(history or []):
+        content = text_content(message.get("content"))
+        if message.get("role") == "assistant" and len(content) > 250:
+            return content
+    return None
+
+
+def answer_follow_up(question: str, report: str, language: str) -> str:
+    prompt = (
+        "Answer only from the completed market-selection report below. Do not fetch current data, give financial advice, "
+        "or invent facts. If unsupported, say so and suggest /new-report <sector>.\n\n"
+        f"Language: {language}\n\nCompleted report:\n{report}\n\nQuestion: {question}"
+    )
+    return str(fallback_llm().call(prompt))
 SPANISH_SECTOR_LABELS = {
     "Technology": "Tecnología",
     "Healthcare": "Salud",
@@ -119,7 +143,7 @@ def submit_sector(message: str, history: list[dict], language: str):
     message = (message or "").strip()
     if not message:
         raise gr.Error("Ingresá un sector." if language == "Español" else "Enter a sector.")
-    status = UI_TEXT[language if language in UI_TEXT else "English"]["status"]
+    status = UI_TEXT[language if language in UI_TEXT else "English"]["status"] if message.lower().startswith(NEW_REPORT_COMMAND) or not prior_report(history) else "**Answering from the completed report.**" if language == "English" else "**Respondiendo a partir del informe completado.**"
     return gr.Textbox(value="", interactive=False), [
         *(history or []),
         {"role": "user", "content": message},
@@ -147,8 +171,21 @@ def finish_submission_progress(history: list[dict], language: str):
     if len(history) < 2 or history[-2]["role"] != "user":
         yield gr.Textbox(interactive=True), history, gr.Button(interactive=True), True
         return
-    content = history[-2]["content"]
-    sector = content if isinstance(content, str) else "\n".join(block["text"] for block in content if block.get("type") == "text")
+    sector = text_content(history[-2]["content"])
+    report = prior_report(history[:-2])
+    if sector.lower().startswith(NEW_REPORT_COMMAND):
+        sector = sector[len(NEW_REPORT_COMMAND):].strip()
+        if not sector:
+            error = "Use /new-report followed by a sector." if language == "English" else "Usá /new-report seguido de un sector."
+            yield gr.Textbox(interactive=True), [*history[:-1], {"role": "assistant", "content": error}], gr.Button(interactive=True), True
+            return
+    elif report:
+        try:
+            response = answer_follow_up(sector, report, language)
+        except Exception:
+            response = "I couldn't answer from the current report. Try /new-report <sector>." if language == "English" else "No pude responder a partir del informe actual. Probá /new-report <sector>."
+        yield gr.Textbox(interactive=True), [*history[:-1], {"role": "assistant", "content": response}], gr.Button(interactive=True), True
+        return
     text = UI_TEXT[language]
     updates = queue.Queue()
     stages = (

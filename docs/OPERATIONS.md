@@ -9,6 +9,10 @@
 
 For the web interface, run `uv run python app.py` and open `http://127.0.0.1:7860`. Override the port with `PORT`; production services must expose that same environment-provided port.
 
+## Follow-up conversation
+
+After a completed report, ordinary chat messages are answered only from that report and do not fetch current market data. Use `/new-report <sector>` to begin a new market-selection run.
+
 Generated files in `output/` and `sandbox*/` are local artifacts and are excluded from publication.
 
 At runtime, missing model-provider keys are skipped and the configured providers are tried in quality order. If all configured providers fail, the error lists each attempted provider without exposing credentials.
