@@ -1,5 +1,8 @@
-Upstream license
-Source: https://github.com/ed-donner/agents
+This project was developed independently, inspired by concepts from
+[Ed Donner's agentic AI engineering course](https://github.com/ed-donner/agents).
+No endorsement by the course author is implied.
+
+The following license applies to code incorporated or adapted from the course:
 
 MIT License
 

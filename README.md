@@ -2,10 +2,6 @@
 
 A bilingual research assistant that finds trending companies in a sector, researches them, and proposes one candidate with supporting reasoning.
 
-## Attribution
-
-Project built from [Ed Donner's agentic AI engineering course](https://github.com/ed-donner/agents). The upstream MIT copyright notice is preserved in [LICENSE](LICENSE). No endorsement by the course author is implied.
-
 ## Run locally
 
 Python 3.12 and uv are the documented development baseline.  Run the following commands from this repository's root.
