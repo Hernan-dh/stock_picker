@@ -90,3 +90,10 @@ must not include prompts, generated content, credentials or personal data.
 CAPTCHA is intentionally disabled. Enable it only after logs or provider metrics
 show automated abuse, and document the selected provider and privacy impact
 before deployment.
+## Container deployment
+
+The public portfolio deployment runs this application in Docker behind Caddy.
+Set `PORT=7860` and `GRADIO_ROOT_PATH` to the externally mounted path (for
+example, `/twin` or `/debate`). Keep the service bound to loopback through
+Docker Compose; Caddy is the only public HTTPS entry point. The runtime
+`.env` remains untracked and is loaded with Compose `env_file`.
