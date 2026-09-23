@@ -78,3 +78,15 @@ Verification includes tests for Unicode text, long PDFs, DOCX tables, source
 URLs, invalid formats, empty reports and clearing stale download state. Test
 live downloads after deployment in both interface languages; MD should match
 the completed response and PDF/DOCX should open with legible headings and tables.
+## Public demo safeguards
+
+Provider credentials must be supplied only through the untracked `.env` file or
+the deployment environment; `.env.example` contains placeholders only. Public
+errors distinguish an exhausted free-model quota from general provider
+unavailability without exposing upstream response bodies. Failure logs contain
+only a fixed event name, exception class and random incident identifier; they
+must not include prompts, generated content, credentials or personal data.
+
+CAPTCHA is intentionally disabled. Enable it only after logs or provider metrics
+show automated abuse, and document the selected provider and privacy impact
+before deployment.

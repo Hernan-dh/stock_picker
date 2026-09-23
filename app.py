@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 from stock_picker.crew import StockPicker
 from stock_picker.model_provider import fallback_llm
 from styles import CSS, JS
+from runtime_safety import log_failure, public_error_message
 
 ROOT = Path(__file__).resolve().parent
 load_dotenv(ROOT / ".env", override=True)
@@ -133,8 +134,8 @@ def analyze_sector(message: str, _history, language: str, task_callback=None) ->
             "language_instruction": text["instruction"],
         })
     except Exception as error:
-        print(f"[web] stock analysis failed ({type(error).__name__})", flush=True)
-        return text["error"]
+        log_failure("stock_analysis.run", error)
+        return public_error_message(error, language, "el análisis" if language == "Español" else "the analysis")
     return f"{text['disclaimer']}\n\n{result.raw}"
 
 
@@ -182,8 +183,9 @@ def finish_submission_progress(history: list[dict], language: str):
     elif report:
         try:
             response = answer_follow_up(sector, report, language)
-        except Exception:
-            response = "I couldn't answer from the current report. Try /new-report <sector>." if language == "English" else "No pude responder a partir del informe actual. Probá /new-report <sector>."
+        except Exception as error:
+            log_failure("stock_analysis.follow_up", error)
+            response = public_error_message(error, language, "la respuesta" if language == "Español" else "the answer")
         yield gr.Textbox(interactive=True), [*history[:-1], {"role": "assistant", "content": response}], gr.Button(interactive=True), True
         return
     text = UI_TEXT[language]
@@ -205,8 +207,8 @@ def finish_submission_progress(history: list[dict], language: str):
         try:
             updates.put((analyze_sector(sector, history[:-2], language, task_callback=on_task_complete), True))
         except Exception as error:
-            print(f"[web] stock analysis failed ({type(error).__name__})", flush=True)
-            updates.put((text["error"], True))
+            log_failure("stock_analysis.worker", error)
+            updates.put((public_error_message(error, language, "el análisis" if language == "Español" else "the analysis"), True))
     thread = threading.Thread(target=work, daemon=True)
     thread.start()
     while thread.is_alive() or not updates.empty():
