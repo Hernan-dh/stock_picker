@@ -323,12 +323,12 @@ with gr.Blocks(delete_cache=(3600, 86400)) as demo:
 
     language.change(
         localized_ui, inputs=language, outputs=[header, english_chat, spanish_chat],
-        js="(language) => { document.title = language === 'Español' ? 'Selector de acciones' : 'Stock Picker'; return language; }",
+            js="(language) => { if (window.__stockPickerAutoLanguage) delete window.__stockPickerAutoLanguage; else try { localStorage.setItem('stock-picker-language', language); } catch {} document.title = language === 'Español' ? 'Selector de acciones' : 'Stock Picker'; return language; }",
     )
     browser_language = gr.Textbox(visible=False)
     demo.load(
         initialize_language, inputs=browser_language, outputs=[language, header, english_chat, spanish_chat],
-        js="() => navigator.language || ''",
+        js="() => { try { const saved = localStorage.getItem('stock-picker-language'); if (saved === 'Español' || saved === 'English') return saved; } catch {} window.__stockPickerAutoLanguage = true; return navigator.language || ''; }",
     )
 
 demo.queue(default_concurrency_limit=1)
