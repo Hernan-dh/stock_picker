@@ -15,7 +15,7 @@ The runtime is pinned to CrewAI 1.15.18 for reproducible execution.
 - `src/stock_picker/main.py`: command-line entry points and kickoff inputs.
 - `app.py`: bilingual Gradio interface for sector-based stock research.
 - `styles.py`: responsive visual identity shared with the other portfolio agents.
-- `render.yaml`: Render web-service configuration.
+- `Dockerfile`: container image definition for the public demo.
 - `knowledge/`: versioned knowledge supplied to the crew.
 - `output/` and `sandbox*/`: generated execution artifacts excluded from Git.
 - `scripts/`: shared verification, documentation, hook installation, and safe publishing commands.

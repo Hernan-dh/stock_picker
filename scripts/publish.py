@@ -14,13 +14,13 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_GEMINI_MODELS = (
-    "gemini-3.7-flash",
-    "gemini-3.6-flash",
     "gemini-3.5-flash",
+    "gemini-3.7-flash",
     "gemini-3.5-flash-lite",
     "gemini-3.1-flash-lite",
 )
 GEMINI_THINKING_LEVELS = {
+    "gemini-3.8-flash": "low",
     "gemini-3.7-flash": "low",
     "gemini-3.6-flash": "low",
     "gemini-3.5-flash": "minimal",
@@ -28,6 +28,7 @@ GEMINI_THINKING_LEVELS = {
     "gemini-3.1-flash-lite": "low",
 }
 DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b"
+DEFAULT_OPENROUTER_MODEL = "nvidia/nemotron-3.5-lightning:free"
 DEFAULT_REQUEST_TIMEOUT = 15
 MAX_CHANGE_CONTEXT = 24_000
 USER_AGENT = "stock_picker-publish/1.0"
@@ -194,6 +195,12 @@ def generate_with_groq(prompt: str, model: str, api_key: str, base_url: str, tim
     return parse_proposal(response["choices"][0]["message"]["content"])
 
 
+def generate_with_openrouter(prompt: str, model: str, api_key: str, base_url: str, timeout: int) -> tuple[str, str]:
+    payload = {"model": model, "messages": [{"role": "user", "content": prompt}], "temperature": 0.4, "max_tokens": 1_000}
+    response = post_json(f"{base_url.rstrip('/')}/chat/completions", {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}, payload, timeout)
+    return parse_proposal(response["choices"][0]["message"]["content"])
+
+
 def generate_proposal(paths: list[str]) -> tuple[str, str]:
     load_environment()
     prompt = proposal_prompt(paths)
@@ -209,6 +216,12 @@ def generate_proposal(paths: list[str]) -> tuple[str, str]:
             for model in gemini_models
         )
 
+    openrouter_key = os.getenv("OPENROUTER_API_KEY", "").strip()
+    if openrouter_key:
+        openrouter_model = os.getenv("OPENROUTER_COMMIT_MODEL", os.getenv("OPENROUTER_MODEL", DEFAULT_OPENROUTER_MODEL)).strip()
+        openrouter_base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").strip()
+        attempts.append((f"OpenRouter/{openrouter_model}", lambda: generate_with_openrouter(prompt, openrouter_model, openrouter_key, openrouter_base_url, timeout)))
+
     groq_key = os.getenv("GROQ_API_KEY", "").strip()
     if groq_key:
         groq_model = os.getenv("GROQ_COMMIT_MODEL", os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL)).strip()
@@ -216,7 +229,7 @@ def generate_proposal(paths: list[str]) -> tuple[str, str]:
         attempts.append((f"Groq/{groq_model}", lambda: generate_with_groq(prompt, groq_model, groq_key, groq_base_url, timeout)))
 
     if not attempts:
-        raise SystemExit("No commit-generation API key is configured. Set GEMINI_API_KEY or GROQ_API_KEY, or provide both --title and --description.")
+        raise SystemExit("No commit-generation API key is configured. Set GEMINI_API_KEY, OPENROUTER_API_KEY or GROQ_API_KEY, or provide both --title and --description.")
 
     failures: list[str] = []
     for label, attempt in attempts:

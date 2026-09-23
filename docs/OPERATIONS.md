@@ -93,7 +93,6 @@ before deployment.
 ## Container deployment
 
 The public portfolio deployment runs this application in Docker behind Caddy.
-Set `PORT=7860` and `GRADIO_ROOT_PATH` to the externally mounted path (for
-example, `/twin` or `/debate`). Keep the service bound to loopback through
-Docker Compose; Caddy is the only public HTTPS entry point. The runtime
-`.env` remains untracked and is loaded with Compose `env_file`.
+Set `PORT=7860` and `GRADIO_ROOT_PATH=/stocks`. Keep the service bound to
+loopback through Docker Compose; Caddy is the only public HTTPS entry point.
+The runtime `.env` remains untracked and is loaded with Compose `env_file`.
