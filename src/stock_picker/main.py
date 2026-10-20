@@ -4,10 +4,13 @@ import warnings
 
 from datetime import datetime
 
+from stock_picker.observability import configure_observability
 from stock_picker.crew import StockPicker
 from stock_picker.model_provider import fallback_llm
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
+
+configure_observability()
 
 # This main file is intended to be a way for you to run your
 # crew locally, so refrain from adding unnecessary logic into this file.

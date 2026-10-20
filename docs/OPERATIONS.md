@@ -19,6 +19,10 @@ At runtime, missing model-provider keys are skipped and the configured providers
 
 Each search returns at most four Serper results. The finder is limited to two focused searches and four CrewAI iterations; the researcher is limited to three searches and five iterations. The final picker has three iterations, leaving recovery room without unnecessary model calls. Explicit provider rate limits receive one retry only when the requested wait is ten seconds or less; daily quotas and longer waits move immediately to the next configured model.
 
+## Phoenix tracing
+
+Tracing is opt-in. Set `PHOENIX_COLLECTOR_ENDPOINT` to a Phoenix OTLP endpoint and, when required, `PHOENIX_API_KEY`. The entry point instruments CrewAI through OpenInference; leaving the endpoint unset sends no traces.
+
 ## Verification
 
 Run `./scripts/verify.sh`, or on Windows run `uv run python scripts/verify.py`.
