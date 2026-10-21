@@ -15,6 +15,7 @@ MODEL_FALLBACKS = (
     ModelSpec("Gemini", "gemini-3.8-flash", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/"),
     ModelSpec("Gemini", "gemini-3.7-flash", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/"),
     ModelSpec("Gemini", "gemini-3.6-flash", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/"),
+    *(ModelSpec("Gemini", model, key, "https://generativelanguage.googleapis.com/v1beta/openai/") for key in ("GEMINI_API_KEY_2", "GEMINI_API_KEY_3", "GEMINI_API_KEY_4") for model in ("gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash")),
     ModelSpec("Groq", "openai/gpt-oss-120b", "GROQ_API_KEY", "https://api.groq.com/openai/v1"),
     ModelSpec("OpenRouter", "nvidia/nemotron-3-ultra-550b-a55b:free", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1"),
     ModelSpec("OpenRouter", "nvidia/nemotron-3-super-120b-a12b:free", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1"),

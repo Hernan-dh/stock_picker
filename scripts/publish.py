@@ -207,12 +207,12 @@ def generate_proposal(paths: list[str]) -> tuple[str, str]:
     timeout = int(os.getenv("COMMIT_GENERATION_TIMEOUT", str(DEFAULT_REQUEST_TIMEOUT)))
     attempts: list[tuple[str, object]] = []
 
-    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+    gemini_keys = tuple(dict.fromkeys(key for name in ("GEMINI_API_KEY", "GEMINI_API_KEY_2", "GEMINI_API_KEY_3", "GEMINI_API_KEY_4") if (key := os.getenv(name, "").strip())))
     configured_models = os.getenv("GEMINI_COMMIT_MODELS", os.getenv("GEMINI_COMMIT_MODEL", ""))
     gemini_models = tuple(model.strip() for model in configured_models.split(",") if model.strip()) or DEFAULT_GEMINI_MODELS
-    if gemini_key:
+    for key_index, gemini_key in enumerate(gemini_keys, start=1):
         attempts.extend(
-            (f"Gemini/{model}", lambda model=model: generate_with_gemini(prompt, model, gemini_key, timeout))
+            (f"Gemini key {key_index}/{model}", lambda model=model, key=gemini_key: generate_with_gemini(prompt, model, key, timeout))
             for model in gemini_models
         )
 
